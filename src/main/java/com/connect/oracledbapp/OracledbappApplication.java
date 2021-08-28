@@ -10,7 +10,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SpringBootApplication
 public class OracledbappApplication implements CommandLineRunner {
@@ -31,6 +35,9 @@ public class OracledbappApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
+AtomicReference<List<String>> listAtomicReference= new AtomicReference<>();
+
+		listAtomicReference.set(new ArrayList<>());
 
 		Employee sking = employeeRepository.findByEmail("SKING");
 
@@ -65,6 +72,27 @@ public class OracledbappApplication implements CommandLineRunner {
 		List<Object[]> resultList1= query1.getResultList();
 		resultList1.stream().forEach(objects -> System.out.println(" first_name "+objects[0]+" , department_name "+objects[1]));
 */
+
+		System.out.println("===============================================");
+		Query query = entityManager.createNativeQuery("select * from employees");
+		Map<String,List<String>> listMap= new HashMap<>();
+		List<Object[]> resultList= query.getResultList();
+
+		resultList.stream().forEach(objects -> {
+			if(!listMap.containsKey(objects[6])){
+				List<String> strings = new ArrayList<>();
+				strings.add((String) objects[1]);
+				listMap.put((String) objects[6],strings);
+			}
+
+			else if(listMap.containsKey(objects[6])){
+				List<String> strings = listMap.get(objects[6]);
+				strings.add((String) objects[1]);
+				listMap.put((String) objects[6],strings);
+			}
+		});
+
+		System.out.println(listMap);
 
 
 	}
